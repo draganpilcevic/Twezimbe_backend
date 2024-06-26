@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 
 const handleValidationErrors = async (req: Request, res: Response, next: NextFunction) => {
@@ -28,12 +28,12 @@ export const validateUserSignIn = [
 ];
 
 export const validateUserSignUp = [
-    body('firstName')
+    body('surName')
         .isString()
         .withMessage('First name must be a string')
         .isLength({ min: 2 })
         .withMessage('First name is required'),
-    body('lastName')
+    body('givenName')
         .isString()
         .withMessage('Last name must be a string')
         .isLength({ min: 2 })
@@ -63,12 +63,12 @@ export const validateUserSignUp = [
 ];
 
 export const validateUpdateUserInfo = [
-    body('firstName')
+    body('surName')
         .isString()
         .withMessage('First name must be a string')
         .isLength({ min: 2 })
         .withMessage('First name is required'),
-    body('lastName')
+    body('givenName')
         .isString()
         .withMessage('Last name must be a string')
         .isLength({ min: 2 })

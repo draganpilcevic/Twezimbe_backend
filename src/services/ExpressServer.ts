@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
-import path from 'path';
 import ErrorHandlerMiddleware from '../middlewares/ErrorHandler';
 import productRouter from '../routes/application.routes';
 import roleRouter from '../routes/role.routes';
@@ -8,8 +7,9 @@ import userRouter from '../routes/user.routes';
 
 export default async (app: Application) => {
     app.use(express.json());
-    app.use('/images', express.static(path.join(__dirname, '../images')));
     
+    const multer = require('multer');
+    const upload = multer({ dest: 'src/uploads/' });
     app.use(cors({
         origin: [process.env.CLIENT_URL as string],
         credentials: true,
@@ -23,6 +23,16 @@ export default async (app: Application) => {
         res.send({
             message: "Health OK!"
         });
+    });
+//Photograph upload
+    app.post('/file', upload.single('file'), (req, res) => {
+        // Access uploaded file via req.file
+        res.send({ fileName: req?.file?.filename });
+    });
+//IDphoto upload
+    app.post('/IDPhoto', upload.single('file'), (req, res) => {
+        // Access uploaded file via req.file
+        res.send({ fileName: req?.file?.filename });
     });
 
     app.use('/api/v1/auth', userRouter);

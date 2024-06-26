@@ -1,9 +1,9 @@
-import { model, Document, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 import { ApplicationDoc } from "../dto/application.dto";
 
 const ApplicationSchema = new Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    surName: { type: String, required: true },
+    givenName: { type: String, required: true },
     nationalId: { type: String, required: true },
     email: { type: String, required: true },
     teacherId: { type: String, required: true },

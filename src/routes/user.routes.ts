@@ -3,6 +3,8 @@ import { forgotPassword, getUserProfile, regenerateOTP, resetPassword, signIn, s
 import { validateEmail, validateOTP, validatePasswordReset, validateUpdateUserInfo, validateUserSignIn, validateUserSignUp } from '../utils/userValidation';
 const userRouter = express.Router();
 
+
+
 userRouter.post('/signup', validateUserSignUp, signUp);
 userRouter.post('/signin', validateUserSignIn, signIn);
 userRouter.get('/user', getUserProfile);
@@ -12,6 +14,7 @@ userRouter.post('/forgotPassword', validateEmail, forgotPassword);
 userRouter.post('/resetPassword', validatePasswordReset, resetPassword);
 userRouter.put('/update', validateUpdateUserInfo, updateAccount);
 userRouter.get('/validate', verifyToken);
+
 
 
 export default userRouter;

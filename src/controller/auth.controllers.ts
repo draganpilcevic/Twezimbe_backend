@@ -32,11 +32,11 @@ export const signUp = asyncWrapper(async (req: Request, res: Response, next: Nex
     
     var emailMessageBody = '';
     if (recordedUser.role === 'Manager') {
-        emailMessageBody = `Hello ${recordedUser.lastName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/manager/auth/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
+        emailMessageBody = `Hello ${recordedUser.givenName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/manager/auth/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
     } else if (recordedUser.role === 'Admin') {
-        emailMessageBody = `Hello ${recordedUser.lastName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/admin/auth/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
+        emailMessageBody = `Hello ${recordedUser.givenName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/admin/auth/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
     } else {
-        emailMessageBody = `Hello ${recordedUser.lastName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
+        emailMessageBody = `Hello ${recordedUser.givenName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/verifyotp?id=${recordedUser._id}.\n\nBest regards,\n\nTwezimbe`;
     }
 
     // Send email
@@ -137,7 +137,7 @@ export const regenerateOTP = asyncWrapper(async (req: Request, res: Response, ne
     await foundUser.save();
 
     // Send email
-    await sendEmail(foundUser.email, "Verify your account", `Hello ${foundUser.lastName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/verifyotp?id=${foundUser._id}\n\nBest regards,\n\nTwezimbe`);
+    await sendEmail(foundUser.email, "Verify your account", `Hello ${foundUser.givenName},\n\nYour OTP is ${otp}. \n\nClick on the link bellow to validate your account: \n${process.env.CLIENT_URL}/verifyotp?id=${foundUser._id}\n\nBest regards,\n\nTwezimbe`);
     
     // Send response
     res.status(200).json({ message: "OTP resent!" });
@@ -184,7 +184,7 @@ export const forgotPassword = asyncWrapper(async (req: Request, res: Response, n
     });
 
     const link = `${process.env.CLIENT_URL}/resetpassword?token=${token}&id=${foundUser._id}`
-    const emailBody = `Hello ${foundUser.lastName},\n\nClick on the link bellow to reset your password.\n\n${link}\n\nBest regards,\n\nTwezimbe`;
+    const emailBody = `Hello ${foundUser.givenName},\n\nClick on the link bellow to reset your password.\n\n${link}\n\nBest regards,\n\nTwezimbe`;
 
     await sendEmail(foundUser.email, "Reset your password", emailBody);
 
@@ -213,21 +213,60 @@ export const resetPassword = asyncWrapper(async (req: Request, res: Response, ne
 
 
 export const updateAccount = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body);
+    
     const isTokenValid = await ValidateToken(req);
     if (!isTokenValid) {
         return res.status(400).json({ message: "Access denied" });
     };
-
+    
     await UserModel.findByIdAndUpdate(req.user?._id, {
         $set: {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
+            title: req.body.title,
+            surName: req.body.surName,
+            givenName: req.body.givenName,
+            otherNames: req.body.otherNames,
             email: req.body.email,
             phone: req.body.phone,
             code: req.body.code,
             addressLine1: req.body.addressLine1,
             addressLine2: req.body.addressLine2,
             city: req.body.city,
+            photograph: req.body.photograph,
+            gender: req.body.gender,
+            tribe: req.body.tribe,
+            religion: req.body.religion,
+            placeOfBirth: req.body.placeOfBirth,
+            currentParish: req.body.currentParish,
+            birthday: req.body.birthday,
+            nationalIDNumber: req.body.nationalIDNumber,
+            nationalIDPhoto: req.body.nationalIDPhoto,
+            homeAddress: req.body.homeAddress,
+            homeLocation: req.body.homeLocation,
+            districtOfBirth: req.body.districtOfBirth,
+            birthParish: req.body.birthParish,
+            birthVillage: req.body.birthVillage,
+            birthHome: req.body.birthHome,
+            maritalStatus: req.body.maritalStatus,
+            cprofessionity: req.body.profession,
+            jobTitle: req.body.jobTitle,
+            nextOfKin: req.body.nextOfKin,
+            monthlyIncome: req.body.monthlyIncome,
+            bankName: req.body.bankName,
+            accountNumber: req.body.accountNumber,
+            registeredMobileAccount: req.body.registeredMobileAccount,
+            registeredEmailWithBank: req.body.registeredEmailWithBank,
+            highestEducation: req.body.highestEducation,
+            otherEducation: req.body.otherEducation,
+            employmentStatus: req.body.employmentStatus,
+            placeOfWorkAddress: req.body.placeOfWorkAddress,
+            employerDetails: req.body.employerDetails,
+            groupMembership: req.body.groupMembership,
+            userID: req.body.userID,
+            notificationPreferences: req.body.notificationPreferences,
+            twoFactorAuth: req.body.twoFactorAuth,
+            securityQuestions: req.body.securityQuestions,
+            
         },
         new: true
     });

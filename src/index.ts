@@ -3,6 +3,7 @@ import "dotenv/config";
 import express from 'express';
 import Database from './services/Database';
 import ExpressServer from './services/ExpressServer';
+var path = require("path");
 const cors = require("cors");
 
 cloudinary.config({
@@ -19,6 +20,11 @@ const StartServer = async () => {
       };
     app.use(cors(corsOptions))
     app.options('*', cors(corsOptions));
+
+    app.use('/api/v1',express.static(path.join(__dirname, "uploads")));
+    console.log(__dirname);
+
+
     await Database();
     await ExpressServer(app);
 

@@ -1,6 +1,6 @@
 export interface ApplicationDoc extends Document {
-    firstName: string;   
-    lastName: string;
+    surName: string;   
+    givenName: string;
     nationalId: string;
     email: string;
     teacherId: string;
