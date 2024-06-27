@@ -7,11 +7,10 @@ export const addRole = asyncWrapper(async (req: Request, res: Response, next: Ne
     // if (!isTokenValid) {
     //     return res.status(400).json({ message: "Access denied" });
     // };
-    console.log('jj',req.body)
     const newRole = await RoleModel.create(req.body);
 
     if (newRole) {
-        res.status(201).json({ message: "newRole added successfully", application: newRole });
+        res.status(201).json({ message: "newRole added successfully", role: newRole });
     };
 
 });

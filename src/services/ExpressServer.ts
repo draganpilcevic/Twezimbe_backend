@@ -2,6 +2,7 @@ import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import ErrorHandlerMiddleware from '../middlewares/ErrorHandler';
 import productRouter from '../routes/application.routes';
+import groupRouter from '../routes/group.routes';
 import roleRouter from '../routes/role.routes';
 import userRouter from '../routes/user.routes';
 
@@ -38,6 +39,7 @@ export default async (app: Application) => {
     app.use('/api/v1/auth', userRouter);
     app.use('/api/v1/product', productRouter);
     app.use('/api/v1/role', roleRouter);
+    app.use('/api/v1/group', groupRouter);
 
     app.use(ErrorHandlerMiddleware);
 
