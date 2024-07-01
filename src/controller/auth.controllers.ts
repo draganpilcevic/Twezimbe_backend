@@ -146,6 +146,7 @@ export const regenerateOTP = asyncWrapper(async (req: Request, res: Response, ne
 
 export const verifyOTP = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     console.log(req.body);
+
     const foundUser = await UserModel.findOne({ otp: req.body.otp });
     
     if (!foundUser) {
@@ -266,7 +267,7 @@ export const updateAccount = asyncWrapper(async (req: Request, res: Response, ne
             notificationPreferences: req.body.notificationPreferences,
             twoFactorAuth: req.body.twoFactorAuth,
             securityQuestions: req.body.securityQuestions,
-            
+            is_profileCompleted: true
         },
         new: true
     });

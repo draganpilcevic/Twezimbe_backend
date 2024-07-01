@@ -4,13 +4,16 @@ import { model, Schema } from "mongoose";
 
 const UserGroupSchema = new Schema({
     user_id: {type: ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     group_id: { type: ObjectId,
-        ref: 'Group'
+        ref: 'Group',
+        required: true
     },
     role_id: {type: ObjectId,
-        ref: 'Role'
+        ref: 'Role',
+        required: true
     },
 
 },{

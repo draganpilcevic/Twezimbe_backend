@@ -45,12 +45,12 @@ export const validateUserSignUp = [
         .isEmail()
         .withMessage('Invalid email')
         .normalizeEmail(),
-    body('phone')
-        .not()
-        .isEmpty()
-        .withMessage('Phone number is required')
-        .isLength({ min: 10, max: 10 })
-        .withMessage('Invalid phone number'),
+    // body('phone')
+    //     .not()
+    //     .isEmpty()
+    //     .withMessage('Phone number is required')
+    //     .isLength({ min: 16, max: 16 })
+    //     .withMessage('Invalid phone number'),
     body('password')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
@@ -80,12 +80,12 @@ export const validateUpdateUserInfo = [
         .isEmail()
         .withMessage('Invalid email')
         .normalizeEmail(),
-    body('phone')
-        .not()
-        .isEmpty()
-        .withMessage('Phone number is required')
-        .isLength({ min: 10, max: 10 })
-        .withMessage('Invalid phone number'),
+    // body('phone')
+    //     .not()
+    //     .isEmpty()
+    //     .withMessage('Phone number is required')
+    //     .isLength({ min: 16, max: 16 })
+    //     .withMessage('Invalid phone number'),
     body('code')
         .optional()
         .isString()

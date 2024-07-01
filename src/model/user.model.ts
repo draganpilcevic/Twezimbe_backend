@@ -65,6 +65,7 @@ interface UserDoc extends Document {
     consentAgreements?: boolean;
     customFields?: any; 
     is_active: boolean;
+    is_profileCompleted: boolean;
     last_login: Date;
     date_joined: Date;
     del_falg: number;
@@ -97,7 +98,7 @@ const UserSchema = new Schema({
     nationalIDNumber: { type: String },
     nationalIDPhoto: { type: String },
     email: { type: String, required: true },
-    phone: { type: String, required: true },
+    phone: { type: String },
     password: { type: String, required: true },
     homeAddress: { type: String },
     homeLocation: { type: String },
@@ -153,6 +154,7 @@ const UserSchema = new Schema({
     consentAgreements: {type: Boolean},
     customFields: {type: String},
     is_active: { type: Boolean, default: false},
+    is_profileCompleted: { type : Boolean, default: false},
     last_login: { type: Date},
     date_joined: { type: Date },
     del_falg: { type: Number, default: 0 },
