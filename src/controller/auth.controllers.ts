@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
 import asyncWrapper from "../middlewares/AsyncWrapper";
 import RoleModel from "../model/role.model";
 import { Token } from "../model/token.model";
 import UserModel from "../model/user.model";
+import UserGroupModel from "../model/user_group";
+import UserGroupChannelModel from "../model/user_groupChannel";
 import RoleUser from "../model/user_role";
 import { GenerateOTP, sendEmail } from "../utils/notification.utils";
 import { GeneratePassword, GenerateSalt, GenerateToken, ValidatePassword, ValidateToken, isTokenValid } from "../utils/password.utils";
@@ -49,7 +52,6 @@ export const signUp = asyncWrapper(async (req: Request, res: Response, next: Nex
     const userRole = await RoleModel.findOne({ role_name: 'User'});
     
     const roleUser = await RoleUser.create({role_id: userRole?._id, user_id: recordedUser._id})
-    console.log("role_user", roleUser);
 
     // Send response
     res.status(200).json({ message: "Account created!" });
@@ -145,7 +147,6 @@ export const regenerateOTP = asyncWrapper(async (req: Request, res: Response, ne
 
 
 export const verifyOTP = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
 
     const foundUser = await UserModel.findOne({ otp: req.body.otp });
     
@@ -214,7 +215,6 @@ export const resetPassword = asyncWrapper(async (req: Request, res: Response, ne
 
 
 export const updateAccount = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body);
     
     const isTokenValid = await ValidateToken(req);
     if (!isTokenValid) {
@@ -289,3 +289,222 @@ export const verifyToken = asyncWrapper(async(req: Request, res: Response, next:
     } 
     res.status(200).json({ message: "Token is valid" });
 });
+
+
+export const getAllUsers = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    const authToken = req.get('Authorization');
+    
+    if (!authToken?.split(' ')[1]) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+    
+    const isValid = await isTokenValid(req);
+    if (!isValid) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+
+    const allUsers = await UserModel.find({ del_falg: 0 })
+    
+    
+    res.status(201).json({ message: "successfully", allUsers: allUsers });
+
+});
+
+
+
+export const getGroupUserList = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    const authToken = req.get('Authorization');
+    
+    if (!authToken?.split(' ')[1]) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+    
+    const isValid = await isTokenValid(req);
+    if (!isValid) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+
+    const { groupId } = req?.query
+
+    if(groupId) {
+        try {
+            if (typeof groupId !== 'string' || !mongoose.Types.ObjectId.isValid(groupId)) {
+                throw new Error('Invalid groupId: must be a valid ObjectId string');
+            }
+
+            const result = await UserGroupModel.aggregate([
+                {
+                    $match: { group_id: new mongoose.Types.ObjectId(groupId) }
+                },
+                {
+                    $lookup: {
+                        from: 'users', // Collection name in MongoDB
+                        localField: 'user_id',
+                        foreignField: '_id',
+                        as: 'userDetails'
+                    }
+                },
+                {
+                    $unwind: '$userDetails'
+                },
+                {
+                    $lookup: {
+                        from: 'roles',
+                        localField: 'role_id',
+                        foreignField: '_id',
+                        as: 'roleInfo'
+                    }
+                },
+                { $unwind: '$roleInfo' },
+                {
+                    $project: {
+                        user_id: '$userDetails._id',
+                        title: '$userDetails.title',
+                        surName: '$userDetails.surName',
+                        givenName: '$userDetails.givenName',
+                        otherNames: '$userDetails.otherNames',
+                        photograph: '$userDetails.photograph',
+                        gender: '$userDetails.gender',
+                        tribe: '$userDetails.tribe',
+                        religion: '$userDetails.religion',
+                        placeOfBirth: '$userDetails.placeOfBirth',
+                        currentParish: '$userDetails.currentParish',
+                        birthday: '$userDetails.birthday',
+                        nationalIDNumber: '$userDetails.nationalIDNumber',
+                        nationalIDPhoto: '$userDetails.nationalIDPhoto',
+                        email: '$userDetails.email',
+                        phone: '$userDetails.phone',
+                        homeAddress: '$userDetails.homeAddress',
+                        homeLocation: '$userDetails.homeLocation',
+                        districtOfBirth: '$userDetails.districtOfBirth',
+                        birthParish: '$userDetails.birthParish',
+                        birthVillage: '$userDetails.birthVillage',
+                        birthHome: '$userDetails.birthHome',
+                        maritalStatus: '$userDetails.maritalStatus',
+                        profession: '$userDetails.profession',
+                        placeOfWorkAddress: '$userDetails.placeOfWorkAddress',
+                        is_active: '$userDetails.is_active',
+                        userID: '$userDetails.userID',
+                        del_falg: '$userDetails.del_falg',
+                        role_name: '$roleInfo.role_name'
+                    }
+                }
+            ]);
+
+            res.status(201).json({ message: "successfully", groupUserList: result });
+
+        } catch (err) {
+            return res.status(400).json({ message: "Failed" });
+        }
+    }
+
+    const allUsers = await UserModel.find({ del_falg: 0 })
+    
+    
+    res.status(201).json({ message: "successfully", allUsers: allUsers });
+
+});
+
+export const getGroupChannelUserList = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+    const authToken = req.get('Authorization');
+    
+    if (!authToken?.split(' ')[1]) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+    
+    const isValid = await isTokenValid(req);
+    if (!isValid) {
+        return res.status(401).json({ message: "Access denied!" });
+    }
+    const { channelId } = req?.query
+        try {
+            if (typeof channelId !== 'string' || !mongoose.Types.ObjectId.isValid(channelId)) {
+                throw new Error('Invalid channelId: must be a valid ObjectId string');
+            }
+
+          
+            const result = await UserGroupChannelModel.aggregate([
+                {
+                    $match: { channel_id: new mongoose.Types.ObjectId(channelId) }
+                },
+                {
+                    $lookup: {
+                        from: 'users', // Collection name in MongoDB
+                        localField: 'user_id',
+                        foreignField: '_id',
+                        as: 'userDetails'
+                    }
+                },
+                {
+                    $unwind: '$userDetails'
+                },
+                {
+                    $lookup: {
+                        from: 'roles',
+                        localField: 'role_id',
+                        foreignField: '_id',
+                        as: 'roleInfo'
+                    }
+                },
+                { $unwind: '$roleInfo' },
+                {
+                    $project: {
+                        user_id: '$userDetails._id',
+                        title: '$userDetails.title',
+                        surName: '$userDetails.surName',
+                        givenName: '$userDetails.givenName',
+                        otherNames: '$userDetails.otherNames',
+                        photograph: '$userDetails.photograph',
+                        gender: '$userDetails.gender',
+                        tribe: '$userDetails.tribe',
+                        religion: '$userDetails.religion',
+                        placeOfBirth: '$userDetails.placeOfBirth',
+                        currentParish: '$userDetails.currentParish',
+                        birthday: '$userDetails.birthday',
+                        nationalIDNumber: '$userDetails.nationalIDNumber',
+                        nationalIDPhoto: '$userDetails.nationalIDPhoto',
+                        email: '$userDetails.email',
+                        phone: '$userDetails.phone',
+                        homeAddress: '$userDetails.homeAddress',
+                        homeLocation: '$userDetails.homeLocation',
+                        districtOfBirth: '$userDetails.districtOfBirth',
+                        birthParish: '$userDetails.birthParish',
+                        birthVillage: '$userDetails.birthVillage',
+                        birthHome: '$userDetails.birthHome',
+                        maritalStatus: '$userDetails.maritalStatus',
+                        profession: '$userDetails.profession',
+                        placeOfWorkAddress: '$userDetails.placeOfWorkAddress',
+                        is_active: '$userDetails.is_active',
+                        userID: '$userDetails.userID',
+                        del_falg: '$userDetails.del_falg',
+                        role_name: '$roleInfo.role_name'
+                    }
+                }
+            ]);
+
+            res.status(201).json({ message: "successfully", groupChannelUserList: result });
+
+        } catch (err) {
+            return res.status(400).json({ message: "Failed" });
+        }
+});
+// export const getGroupFriendList = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+//     const authToken = req.get('Authorization');
+    
+//     if (!authToken?.split(' ')[1]) {
+//         return res.status(401).json({ message: "Access denied!" });
+//     }
+    
+//     const isValid = await isTokenValid(req);
+//     if (!isValid) {
+//         return res.status(401).json({ message: "Access denied!" });
+//     }
+
+//     const { groupId, userId } = req?.query
+
+//     if(groupId) {
+//       const groupFriendList = await UserFriendModel.find({ groupId: groupId, userId: userId })
+
+//         res.status(201).json({ message: "successfully", groupFriendList: groupFriendList });
+//     }
+// });

@@ -66,6 +66,7 @@ interface UserDoc extends Document {
     customFields?: any; 
     is_active: boolean;
     is_profileCompleted: boolean;
+    userID?: string;
     last_login: Date;
     date_joined: Date;
     del_falg: number;

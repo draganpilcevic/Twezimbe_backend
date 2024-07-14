@@ -2,7 +2,10 @@ import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import ErrorHandlerMiddleware from '../middlewares/ErrorHandler';
 import productRouter from '../routes/application.routes';
+import groupChannelRouter from '../routes/channel.routes';
 import groupRouter from '../routes/group.routes';
+import groupChatRouter from '../routes/groupChat.routes';
+import groupUserFriendRouter from '../routes/groupUserFriend.routes';
 import roleRouter from '../routes/role.routes';
 import userRouter from '../routes/user.routes';
 
@@ -40,6 +43,9 @@ export default async (app: Application) => {
     app.use('/api/v1/product', productRouter);
     app.use('/api/v1/role', roleRouter);
     app.use('/api/v1/group', groupRouter);
+    app.use('/api/v1/groupChannel', groupChannelRouter);
+    app.use('/api/v1/groupChat', groupChatRouter);
+    app.use('/api/v1/groupUserFriend', groupUserFriendRouter);
 
     app.use(ErrorHandlerMiddleware);
 

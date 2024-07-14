@@ -22,7 +22,6 @@ const StartServer = async () => {
     app.options('*', cors(corsOptions));
 
     app.use('/api/v1',express.static(path.join(__dirname, "uploads")));
-    console.log(__dirname);
 
 
     await Database();

@@ -4,6 +4,8 @@ import { model, Schema } from "mongoose";
 const RoleSchema = new Schema({
     name: { type: String, required: true },
     group_type: { type: String, required: true, default: 'Social'},
+    group_state: { type: String, required: true, default: 'Public'},
+    group_avatar: { type: String, required: true, default: 'default'},
     description: { type: String },
     tags: { type: String},
     created_by: { type: ObjectId, 

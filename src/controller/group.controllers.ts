@@ -6,6 +6,7 @@ import RoleModel from '../model/role.model';
 import UserGroupModel from '../model/user_group';
 import RoleUserModel from '../model/user_role';
 import { ValidateToken } from "../utils/password.utils";
+
 export const addGroup = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
 
     const isTokenValid = await ValidateToken(req);
@@ -22,19 +23,38 @@ export const addGroup = asyncWrapper(async (req: Request, res: Response, next: N
     const newGroup = await GroupModel.create(req.body);
 
     if (newGroup) {
-        const Role = await RoleModel.findOne({ role_name: "GroupManager"})
+        const ManagerRole = await RoleModel.findOne({ role_name: "GroupManager"})
+        const UserRole = await RoleModel.findOne({ role_name: "GroupUser"})
     
-        await UserGroupModel.create({
+        const newManager = await UserGroupModel.create({
             user_id: req?.body?.created_by,
             group_id: newGroup?._id,
-            role_id: Role?.id
+            role_id: ManagerRole?.id
         })
+
+        if(newManager) {
+            req?.body?.selectedUsers_Id?.forEach(async (user_id: string) => {
+                await UserGroupModel.create({
+                    user_id: user_id,
+                    group_id: newGroup?._id,
+                    role_id: UserRole?.id
+                })
+                
+            })
+        }
 
         await RoleUserModel.create({
             user_id: req?.body?.created_by,
-            role_id: Role?.id
+            role_id: ManagerRole?.id
         })
-        
+
+        req?.body?.selectedUsers_Id?.forEach(async (user_id: string) => {
+            await RoleUserModel.create({
+            user_id: user_id,
+            role_id: UserRole?.id
+            })
+        })
+
         res.status(201).json({ message: "newRole added successfully", group: newGroup });
     };
 
@@ -85,9 +105,30 @@ export const getJoinedGroupList = asyncWrapper(async (req: Request, res: Respons
                     $unwind: '$roleDetails'
                 },
                 {
+                    $lookup: {
+                        from: 'groups', // Collection name in MongoDB
+                        localField: 'group_id',
+                        foreignField: '_id',
+                        as: 'groupDetails'
+                    }
+                },
+                {
+                    $unwind: '$groupDetails'
+                },
+                {
                     $project: {
-                        group_id: 1,
-                        role_name: '$roleDetails.role_name'
+                        group_id: '$group_id',
+                        role_name: '$roleDetails.role_name',
+                        group_name: '$groupDetails.name',
+                        group_type: '$groupDetails.group_type',
+                        group_state: '$groupDetails.group_state',
+                        group_avatar: '$groupDetails.group_avatar',
+                        description: '$groupDetails.description',
+                        tags: '$groupDetails.tags',
+                        created_by: '$groupDetails.created_by',
+                        del_flag: '$groupDetails.del_flag',
+                        createdAt: '$groupDetails.createdAt',
+                        updatedAt: '$groupDetails.updatedAt'
                     }
                 }
             ]);

@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
+import { ApplicationDoc } from "../dto/application.dto";
 import asyncWrapper from "../middlewares/AsyncWrapper";
 import { Application as ApplicationModel } from "../model/application.model";
 import { ValidateToken } from "../utils/password.utils";
-import { ApplicationDoc } from "../dto/application.dto";
 
 export const addNew = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     const isTokenValid = await ValidateToken(req);
@@ -27,7 +27,6 @@ export const list = asyncWrapper(async (req: Request, res: Response, next: NextF
 
 export const update = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.query; // Assuming application ID comes from the request URL
-    // console.log(req.query);
 
     const isTokenValid = await ValidateToken(req);
     if (!isTokenValid) {
