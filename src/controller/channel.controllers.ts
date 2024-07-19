@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import asyncWrapper from "../middlewares/AsyncWrapper";
 import GroupChannelModel from '../model/groupChannel.model';
 import RoleModel from '../model/role.model';
+import UserModel from '../model/user.model';
 import UserGroupModel from '../model/user_group';
 import UserGroupChannelModel from '../model/user_groupChannel';
 import RoleUserModel from '../model/user_role';
@@ -85,7 +86,14 @@ export const getJoinedGroupChannelList = asyncWrapper(async (req: Request, res: 
         return res.status(400).json({ message: "Access denied" });
     }
 
-    const { userId } = req.query
+    const existingUser = await UserModel.findOne({ email: req.user?.email });
+
+    if (!existingUser) {
+        return res.status(400).json({ message: "User not found" });
+    }
+
+    const userId = existingUser?.id
+    // const { userId } = req.query
    
     
     if (userId) {

@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import asyncWrapper from "../middlewares/AsyncWrapper";
+import UserModel from '../model/user.model';
 import { isTokenValid } from "../utils/password.utils";
+
 const GroupChatRoom = require('../models/user/interchange/chat/GroupChatRoomModel'); // Adjust the path to your GroupChatRoom model
 
 const UserFriendModel = require('../model/user_friend');
@@ -19,7 +21,16 @@ export const getGroupFriendList = asyncWrapper(async (req: Request, res: Respons
         return res.status(401).json({ message: "Access denied!" });
     }
 
-    const { groupId, userId } = req?.query
+    
+    const existingUser = await UserModel.findOne({ email: req.user?.email });
+
+    if (!existingUser) {
+        return res.status(400).json({ message: "User not found" });
+    }
+
+    const userId = existingUser?.id
+
+    const { groupId } = req?.query
 
     // if(groupId) {
     //   const groupFriendList = await UserFriendModel.find({ groupId: groupId, userId: userId })

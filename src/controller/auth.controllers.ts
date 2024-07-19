@@ -310,8 +310,6 @@ export const getAllUsers = asyncWrapper(async (req: Request, res: Response, next
 
 });
 
-
-
 export const getGroupUserList = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
     const authToken = req.get('Authorization');
     
@@ -386,7 +384,8 @@ export const getGroupUserList = asyncWrapper(async (req: Request, res: Response,
                         is_active: '$userDetails.is_active',
                         userID: '$userDetails.userID',
                         del_falg: '$userDetails.del_falg',
-                        role_name: '$roleInfo.role_name'
+                        role_name: '$roleInfo.role_name',
+                        group_id: '$group_id'
                     }
                 }
             ]);
@@ -488,23 +487,47 @@ export const getGroupChannelUserList = asyncWrapper(async (req: Request, res: Re
             return res.status(400).json({ message: "Failed" });
         }
 });
-// export const getGroupFriendList = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
-//     const authToken = req.get('Authorization');
+
+
+
+export const updateUserStatus = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+
+    const { userId, is_active} = req?.body
+    const foundUser = await UserModel.findOne({ _id: userId });
     
-//     if (!authToken?.split(' ')[1]) {
-//         return res.status(401).json({ message: "Access denied!" });
-//     }
+    if (!foundUser) {
+        return res.status(400).json({ message: "Invalid User" });
+    };
+
+    foundUser.is_active = is_active;
+    const savedUser = await foundUser.save();
+
+    if (savedUser) {
+        return res.status(200).json({ message: "User status changed!" });
+    }
+});
+
+export const updateUserRole = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
+
+    const { user_id, group_id, role_name} = req?.body
+
+    const foundRole = await RoleModel.findOne({ role_name: role_name })
+
+    const foundUser = await UserGroupModel.findOne({ group_id: group_id, user_id: user_id});
     
-//     const isValid = await isTokenValid(req);
-//     if (!isValid) {
-//         return res.status(401).json({ message: "Access denied!" });
-//     }
+    if (!foundUser) {
+        return res.status(400).json({ message: "Invalid User" });
+    };
 
-//     const { groupId, userId } = req?.query
+    if (!foundRole) {
+        return res.status(400).json({ message: "Invalid Role" });
+    };
 
-//     if(groupId) {
-//       const groupFriendList = await UserFriendModel.find({ groupId: groupId, userId: userId })
+    foundUser.role_id = foundRole?.id;
+    const savedUser = await foundUser.save();
 
-//         res.status(201).json({ message: "successfully", groupFriendList: groupFriendList });
-//     }
-// });
+    if (savedUser) {
+        return res.status(200).json({ message: "User status changed!" });
+    }
+});
+

@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 import asyncWrapper from "../middlewares/AsyncWrapper";
 import GroupModel from '../model/group.model';
 import RoleModel from '../model/role.model';
+import UserModel from '../model/user.model';
 import UserGroupModel from '../model/user_group';
 import RoleUserModel from '../model/user_role';
 import { ValidateToken } from "../utils/password.utils";
-
 export const addGroup = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
 
     const isTokenValid = await ValidateToken(req);
@@ -67,9 +67,9 @@ export const getGroupList = asyncWrapper(async (req: Request, res: Response, nex
         return res.status(400).json({ message: "Access denied" });
     }
 
-    const groupList = await GroupModel.find({ del_flag: 0 })
+    const allGroupList = await GroupModel.find({ del_flag: 0 })
     
-    res.status(201).json({ message: "successfully", groupList: groupList });
+    res.status(201).json({ message: "successfully", allGroupList: allGroupList });
 
 });
 
@@ -79,8 +79,14 @@ export const getJoinedGroupList = asyncWrapper(async (req: Request, res: Respons
     if (!isTokenValid) {
         return res.status(400).json({ message: "Access denied" });
     }
+    const existingUser = await UserModel.findOne({ email: req.user?.email });
 
-    const { userId } = req.query
+    if (!existingUser) {
+        return res.status(400).json({ message: "User not found" });
+    }
+
+    const userId = existingUser?.id
+    // const { userId } = req.query
     
     if (userId) {
         try {
@@ -147,10 +153,12 @@ export const getJoinedGroupList = asyncWrapper(async (req: Request, res: Respons
 export const joinGroup = asyncWrapper(async (req: Request, res: Response, next: NextFunction) => {
 
     const isTokenValid = await ValidateToken(req);
+    
 
     if (!isTokenValid) {
         return res.status(400).json({ message: "Access denied" });
     };
+    
 
     const existingGroup = await UserGroupModel.findOne({ user_id: req.body.user_id, group_id: req.body.group_id });
     
